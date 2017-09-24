@@ -10,6 +10,8 @@ Module Docstring
 """
 from syncer import sync
 import os
+from ConfigParser import SafeConfigParser
+import json
 
 __author__ = "Glen Goffin"
 __version__ = "0.1.0"
@@ -18,9 +20,15 @@ __license__ = "MIT"
 class Config(object):
     """ Manages the config file """
     def __init__(self, filename):
-        self.filename = filename
-        self.sourceDirectories = ['/Volumes/Untitled', '/Users/Glen/Pictures', '/Volumes/NIKON D80', '/Volumes/Seagate 2TB Oct2015/photography']
-        self.targetDirectory = '/Volumes/glen4tb/rsync-dir'
+        config = SafeConfigParser()
+        config.read('config.ini')
+        print json.loads(config.get('main', 'sourceDirectories')) # -> "value1"
+        print json.loads(config.get('main', 'targetDirectory')) # -> "value2"
+        self.sourceDirectories = json.loads(config.get('main', 'sourceDirectories'))
+        self.targetDirectory = json.loads(config.get('main', 'targetDirectory'))
+        # self.filename = filename
+        # self.sourceDirectories = ['/Volumes/Untitled', '/Users/Glen/Pictures', '/Volumes/NIKON D80', '/Volumes/Seagate 2TB Oct2015/photography']
+        # self.targetDirectory = '/Volumes/glen4tb/rsync-dir'
 
 
 def main():
