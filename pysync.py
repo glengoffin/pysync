@@ -22,8 +22,8 @@ class Config(object):
     def __init__(self, filename):
         config = SafeConfigParser()
         config.read('config.ini')
-        print json.loads(config.get('main', 'sourceDirectories')) # -> "value1"
-        print json.loads(config.get('main', 'targetDirectory')) # -> "value2"
+        # print json.loads(config.get('main', 'sourceDirectories')) # -> "value1"
+        # print json.loads(config.get('main', 'targetDirectory')) # -> "value2"
         self.sourceDirectories = json.loads(config.get('main', 'sourceDirectories'))
         self.targetDirectory = json.loads(config.get('main', 'targetDirectory'))
         # self.filename = filename
@@ -31,18 +31,37 @@ class Config(object):
         # self.targetDirectory = '/Volumes/glen4tb/rsync-dir'
 
 
+def getPathTail(path):
+    (drive, head) = os.path.splitdrive(path)
+    while (head != os.sep):
+        (head, tail) = os.path.split(head)
+        return tail
+
 def main():
     """ Main entry point of the app """
     print("Starting Now")
     cfg = Config("config-file.txt")
     sourcedirList = cfg.sourceDirectories
     targetdir = cfg.targetDirectory
-    for sourcedir in sourcedirList:
-    	if (os.path.isdir(sourcedir)):
-    	    print(sourcedir)
-            # sync(sourcedir, targetdir, "sync", -u --ctime --verbose)
-            options = {"verbose":True}
-            sync(sourcedir, targetdir, "sync", **options)
+    path = os.path.normpath(targetdir)
+    folder_list = iter(path.split(os.sep))
+    for folder in folder_list:
+        if folder == "Volumes":
+            drive = next(folder_list)
+            drive = "/Volumes/" + drive
+            break
+    if (os.path.exists(drive)):
+        for sourcedir in sourcedirList:
+            if (os.path.isdir(sourcedir)):
+                tail = getPathTail(sourcedir)
+                newtargetdir = os.path.join(targetdir, tail)
+                # print(newtargetdir)
+                if not os.path.exists(newtargetdir):
+                    os.makedirs(newtargetdir)
+                options = {"verbose":True}
+                sync(sourcedir, newtargetdir, "sync", **options)
+    else:
+        print ("Target disk is not mounted.")
     print("All Done!")
 
 
@@ -50,6 +69,5 @@ if __name__ == "__main__":
     """ This is executed when run from the command line """
     main()
 
-# https://pypi.python.org/pypi/dirsync/2.2.2
 
 
