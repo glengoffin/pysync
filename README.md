@@ -1,2 +1,2 @@
 # pysync
-# Updated May 4, 2020
+Updated May 4, 2020
